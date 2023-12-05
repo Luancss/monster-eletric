@@ -54,4 +54,21 @@ window.onload = function () {
         y: this.pos.y + this.l * Math.sin(this.ang)
       };
     }
-  
+    update(t) {
+      this.ang = Math.atan2(t.y - this.pos.y, t.x - this.pos.x);
+      this.pos.x = t.x + this.l * Math.cos(this.ang - Math.PI);
+      this.pos.y = t.y + this.l * Math.sin(this.ang - Math.PI);
+      this.nextPos.x = this.pos.x + this.l * Math.cos(this.ang);
+      this.nextPos.y = this.pos.y + this.l * Math.sin(this.ang);
+    }
+    fallback(t) {
+      this.pos.x = t.x;
+      this.pos.y = t.y;
+      this.nextPos.x = this.pos.x + this.l * Math.cos(this.ang);
+      this.nextPos.y = this.pos.y + this.l * Math.sin(this.ang);
+    }
+    show() {
+      c.lineTo(this.nextPos.x, this.nextPos.y);
+    }
+  }
+    
