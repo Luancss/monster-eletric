@@ -202,3 +202,136 @@ window.onload = function () {
       c.fill();
     }
   }
+  // Constantes para configuração dos tentáculos
+  let maxl = 300,     // Comprimento máximo do tentáculo
+    minl = 50,      // Comprimento mínimo do tentáculo
+    n = 30,         // Número de segmentos em cada tentáculo
+    numt = 500,     // Número de tentáculos
+    tent = [],      // Array para armazenar objetos de tentáculo
+    clicked = false, // Sinalizador para rastrear clique do mouse
+    target = { x: 0, y: 0 }, // Posição alvo para os tentáculos
+    last_target = {}, // Última posição alvo registrada
+    t = 0,          // Variável para o tempo de animação
+    q = 10;         // Variável usada nos cálculos de animação
+
+  // Inicializa objetos de tentáculo com posições, comprimentos e ângulos aleatórios
+  for (let i = 0; i < numt; i++) {
+    tent.push(
+      new tentacle(
+        Math.random() * w,
+        Math.random() * h,
+        Math.random() * (maxl - minl) + minl,
+        n,
+        Math.random() * 2 * Math.PI
+      )
+    );
+  }
+
+  // Função para desenhar a animação no canvas
+  function draw() {
+    // Atualiza a posição alvo com base no movimento do mouse ou um padrão animado
+    if (mouse.x) {
+      target.errx = mouse.x - target.x;
+      target.erry = mouse.y - target.y;
+    } else {
+      // Padrão animado quando o mouse não é movido
+      target.errx =
+        w / 2 +
+        ((h / 2 - q) * Math.sqrt(2) * Math.cos(t)) /
+        (Math.pow(Math.sin(t), 2) + 1) -
+        target.x;
+      target.erry =
+        h / 2 +
+        ((h / 2 - q) * Math.sqrt(2) * Math.cos(t) * Math.sin(t)) /
+        (Math.pow(Math.sin(t), 2) + 1) -
+        target.y;
+    }
+
+    // Atualiza suavemente a posição alvo
+    target.x += target.errx / 10;
+    target.y += target.erry / 10;
+
+    // Incrementa a variável de tempo para o padrão de animação
+    t += 0.01;
+
+    // Desenha um círculo ao redor da posição alvo com um raio dinamicamente alterado
+    c.beginPath();
+    c.arc(
+      target.x,
+      target.y,
+      dist(last_target.x, last_target.y, target.x, target.y) + 5,
+      0,
+      2 * Math.PI
+    );
+    c.fillStyle = "hsl(210,100%,80%)";
+    c.fill();
+
+    // Move e exibe cada tentáculo
+    for (i = 0; i < numt; i++) {
+      tent[i].move(last_target, target);
+      tent[i].show2(target);
+    }
+    for (i = 0; i < numt; i++) {
+      tent[i].show(target);
+    }
+
+    // Registra a posição alvo atual para o próximo quadro
+    last_target.x = target.x;
+    last_target.y = target.y;
+  }
+
+  // Event listeners para interações com o mouse
+  canvas.addEventListener(
+    "mousemove",
+    function (e) {
+      last_mouse.x = mouse.x;
+      last_mouse.y = mouse.y;
+
+      mouse.x = e.pageX - this.offsetLeft;
+      mouse.y = e.pageY - this.offsetTop;
+    },
+    false
+  );
+
+  canvas.addEventListener("mouseleave", function (e) {
+    mouse.x = false;
+    mouse.y = false;
+  });
+
+  canvas.addEventListener(
+    "mousedown",
+    function (e) {
+      clicked = true;
+    },
+    false
+  );
+
+  canvas.addEventListener(
+    "mouseup",
+    function (e) {
+      clicked = false;
+    },
+    false
+  );
+
+  // Função de loop de animação
+  function loop() {
+    window.requestAnimFrame(loop);
+    // Limpa o canvas e redesenha a animação
+    c.clearRect(0, 0, w, h);
+    draw();
+  }
+
+  // Event listener para redimensionamento da janela
+  window.addEventListener("resize", function () {
+    (w = canvas.width = window.innerWidth),
+      (h = canvas.height = window.innerHeight);
+    loop();
+  });
+
+  // Chamada inicial para o loop de animação
+  loop();
+
+  // Chamada adicional para manter uma taxa de quadros consistente
+  setInterval(loop, 1000 / 60);
+};
