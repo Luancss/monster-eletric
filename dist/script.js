@@ -115,14 +115,14 @@ window.onload = function () {
         );
       }
     }
-    // Move o tentáculo em direção a um alvo
 
+    // Move o tentáculo em direção a um alvo
     move(last_target, target) {
       // Calcula o ângulo entre a posição atual do objeto e o destino
       this.angle = Math.atan2(target.y - this.y, target.x - this.x);
       this.dt = dist(last_target.x, last_target.y, target.x, target.y) + 5;
-      // Calcula uma posição ajustada com base no tempo e no ângulo
 
+      // Calcula uma posição ajustada com base no tempo e no ângulo
       this.t = {
         x: target.x - 0.8 * this.dt * Math.cos(this.angle),
         y: target.y - 0.8 * this.dt * Math.sin(this.angle)
@@ -150,3 +150,55 @@ window.onload = function () {
         }
       }
     }
+    // Função para exibir o tentáculo, com efeitos de luz
+    show(target) {
+      // Verifica se a distância entre o tentáculo e o alvo é menor ou igual ao comprimento do tentáculo
+      if (dist(this.x, this.y, target.x, target.y) <= this.l) {
+        // Define o modo de composição global para "lighter"
+        c.globalCompositeOperation = "lighter";
+        // Inicia o caminho
+        c.beginPath();
+        // Move para a posição inicial do tentáculo
+        c.lineTo(this.x, this.y);
+
+        // Exibe cada segmento do tentáculo
+        for (let i = 0; i < this.n; i++) {
+          this.segments[i].show();
+        }
+
+        // Configuração de estilos para o desenho do tentáculo
+        c.strokeStyle =
+          "hsl(" +
+          (this.rand * 60 + 180) +
+          ",100%," +
+          (this.rand * 60 + 25) +
+          "%)";
+        c.lineWidth = this.rand * 2;
+        c.lineCap = "round";
+        c.lineJoin = "round";
+        // Desenha o tentáculo
+        c.stroke();
+
+        // Restaura o modo de composição global para "source-over"
+        c.globalCompositeOperation = "source-over";
+      }
+    }
+
+    // Função para exibir uma forma circular em torno do tentáculo
+    show2(target) {
+      // Inicia o caminho
+      c.beginPath();
+      // Verifica se a distância entre o tentáculo e o alvo é menor ou igual ao comprimento do tentáculo
+      if (dist(this.x, this.y, target.x, target.y) <= this.l) {
+        // Desenha um círculo branco ao redor do tentáculo
+        c.arc(this.x, this.y, 2 * this.rand + 1, 0, 2 * Math.PI);
+        c.fillStyle = "white";
+        // Desenha um círculo de cor escura ao redor do tentáculo
+      } else {
+        c.arc(this.x, this.y, this.rand * 2, 0, 2 * Math.PI);
+        c.fillStyle = "darkcyan";
+      }
+      // Preenche a forma
+      c.fill();
+    }
+  }
